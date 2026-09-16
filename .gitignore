@@ -1,0 +1,13 @@
+node_modules/
+dist/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
+# Local tooling and build archives
+.claude/
+.agents/
+*.zip

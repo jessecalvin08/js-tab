@@ -1,0 +1,8 @@
+.card {
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: var(--glass-bg, rgba(35, 55, 33, 0.76));
+  transition: background 320ms ease, border-color 320ms ease;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(var(--blur-lg));
+}

@@ -1,0 +1,242 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  padding: 24px;
+  background: rgba(2, 6, 4, 0.55);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: min(700px, 100%);
+  max-height: min(820px, 88vh);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: var(--chrome-bg, rgba(20, 22, 26, 0.98));
+  box-shadow: 0 40px 110px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex: 0 0 auto;
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.modal > header button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  color: rgba(238, 251, 240, 0.72);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.modal > header button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.body {
+  padding: 20px 24px 24px;
+  overflow-y: auto;
+}
+
+.body h3 {
+  margin: 22px 0 12px;
+  color: rgba(238, 251, 240, 0.44);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.scopeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: rgba(238, 251, 240, 0.55);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.segmented button {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  color: rgba(238, 251, 240, 0.6);
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.segmentOn {
+  color: var(--color-cream) !important;
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.dropzone {
+  width: 100%;
+  min-height: 158px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--color-cream);
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.dropzone:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.dropzone svg {
+  color: rgba(238, 251, 240, 0.6);
+}
+
+.dropzone strong {
+  font-size: 1.02rem;
+}
+
+.dropzone small {
+  color: rgba(238, 251, 240, 0.4);
+  font-size: 0.82rem;
+}
+
+.error {
+  margin: 10px 0 0;
+  color: #ff9088;
+  font-size: 0.86rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0;
+}
+
+.tileSelect {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: block;
+}
+
+.tile img,
+.tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tileActive {
+  outline: 2px solid var(--accent-strong, var(--color-mint));
+  outline-offset: 2px;
+}
+
+.defaultTile {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(238, 251, 240, 0.7);
+  font-weight: 700;
+  font-size: 0.84rem;
+  background: linear-gradient(135deg, rgba(31, 57, 30, 0.9), rgba(12, 50, 36, 0.9));
+}
+
+.badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.tileDelete {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 8px;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.6);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 150ms ease, background 150ms ease;
+}
+
+.tile:hover .tileDelete {
+  opacity: 1;
+}
+
+.tileDelete:hover {
+  background: rgba(200, 40, 30, 0.85);
+}
+
+.credit {
+  margin: 16px 0 0;
+  color: rgba(238, 251, 240, 0.32);
+  font-size: 0.76rem;
+}
+
+@media (max-width: 620px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

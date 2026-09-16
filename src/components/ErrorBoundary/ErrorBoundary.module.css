@@ -1,0 +1,77 @@
+.wrap {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #0d1410;
+  color: #eefbf0;
+}
+
+.panel {
+  width: min(560px, 100%);
+  padding: 28px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.panel h1 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+}
+
+.panel p {
+  margin: 0 0 20px;
+  color: rgba(238, 251, 240, 0.7);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.actions button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  color: #0d2418;
+  background: #eefbf0;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #ffffff;
+}
+
+.actions .danger {
+  color: #ffb0aa;
+  background: rgba(255, 80, 70, 0.16);
+}
+
+.actions .danger:hover {
+  background: rgba(255, 80, 70, 0.28);
+}
+
+.panel details {
+  color: rgba(238, 251, 240, 0.5);
+  font-size: 0.84rem;
+}
+
+.panel summary {
+  cursor: pointer;
+}
+
+.panel pre {
+  margin-top: 10px;
+  max-height: 220px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.35);
+  font-size: 0.76rem;
+  white-space: pre-wrap;
+}

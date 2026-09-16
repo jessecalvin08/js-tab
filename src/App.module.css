@@ -1,0 +1,1066 @@
+.shell {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-cream);
+  background:
+    linear-gradient(rgba(8, 18, 12, 0.16), rgba(8, 18, 12, 0.18)),
+    url("/wallpapers/forest-canopy.svg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  padding: clamp(28px, 3.6vh, 36px) clamp(18px, 7.8vw, 150px) 24px;
+}
+
+.shellCustom {
+  background: var(--shell-bg, #0b120e);
+  transition: background 320ms ease;
+}
+
+.wallpaperLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 78% 2%, rgba(255, 255, 255, 0.22), transparent 24rem),
+    linear-gradient(90deg, rgba(6, 18, 12, 0.05), rgba(255, 255, 255, 0.06), rgba(6, 18, 12, 0.14));
+}
+
+.topBar {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 176px minmax(260px, 510px) 228px;
+  gap: clamp(120px, 13vw, 250px);
+  align-items: center;
+  max-width: 1620px;
+  margin: 0 auto;
+}
+
+.widgetCluster {
+  display: grid;
+  grid-template-columns: 128px 118px;
+  gap: 10px;
+  justify-content: end;
+}
+
+.miniWidget {
+  min-height: 58px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 16px;
+  text-align: center;
+  color: var(--color-cream);
+  border-radius: 20px;
+}
+
+.miniWidget small {
+  color: rgba(238, 251, 240, 0.44);
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.miniWidget strong {
+  font-size: 1.04rem;
+  line-height: 1.08;
+}
+
+.weatherLabel {
+  color: rgba(238, 251, 240, 0.5);
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settingsGroup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(238, 251, 240, 0.68);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.segmented {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.segmented button {
+  min-height: 30px !important;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px !important;
+  color: rgba(238, 251, 240, 0.6) !important;
+  background: transparent !important;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.segmentOn {
+  color: var(--color-cream) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.fileButton {
+  min-height: 44px;
+  border-radius: 12px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.09);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.fileButton:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.notice {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(238, 251, 240, 0.8);
+  font-size: 0.84rem;
+}
+
+.dashboard {
+  position: relative;
+  z-index: 1;
+  padding-top: clamp(16px, 2.5vh, 24px);
+  max-width: 1620px;
+  width: 100%;
+  margin: 0 auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Columns are laid out by the browser rather than by computed pixel offsets.
+   Cards live in normal flow inside them, so two cards can never occupy the same
+   space — overlap is impossible by construction. */
+.canvas {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  /* Columns stretch the full height rather than hugging their cards, so the
+     empty space beneath a short column is still a valid drop target. */
+  align-items: stretch;
+  min-height: 70vh;
+  padding-bottom: 40px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-content: flex-start;
+  gap: 18px;
+  min-width: 0;
+}
+
+.dropGap {
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wallpaperDim {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #000000;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.showMore {
+  margin-top: 2px;
+  min-height: 26px;
+  border: 0;
+  border-radius: 8px;
+  color: rgba(238, 251, 240, 0.62);
+  background: rgba(255, 255, 255, 0.06);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.showMore:hover {
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.undoToast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px 12px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--chrome-bg, rgba(16, 20, 18, 0.97));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  color: var(--color-cream);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.undoToast button {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 14px;
+  color: #0d2418;
+  background: var(--color-cream);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.undoToast .undoClose {
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: rgba(238, 251, 240, 0.6);
+  background: transparent;
+}
+
+.undoToast .undoClose:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dropTarget {
+  outline: 2px dashed var(--accent-strong, var(--color-mint));
+  outline-offset: 3px;
+}
+
+.rowDropGap {
+  height: 22px;
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.bookmarkCard {
+  width: 100%;
+  padding: 14px 18px;
+  transition: box-shadow 160ms ease;
+}
+
+.bookmarkCard header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  user-select: none;
+}
+
+.bookmarkCard h2 {
+  font-size: 1rem;
+  line-height: 1;
+  margin: 0;
+}
+
+.linkList {
+  display: grid;
+  gap: 4px;
+}
+
+.cardActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.bookmarkCard:hover .cardActions,
+.calendarCard:hover .cardActions {
+  opacity: 1;
+}
+
+.actionsOpen {
+  opacity: 1;
+}
+
+.cardActions > button,
+.menuWrap > button,
+.rowActions button {
+  border: 0;
+  color: rgba(238, 251, 240, 0.62);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.cardActions > button,
+.menuWrap > button {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.cardActions > button:hover,
+.menuWrap > button:hover,
+.rowActions button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.menuWrap {
+  position: relative;
+  display: flex;
+}
+
+.cardMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 5;
+  min-width: 190px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid var(--glass-border);
+  background: var(--chrome-bg, rgba(16, 24, 16, 0.97));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  display: grid;
+  gap: 2px;
+}
+
+.cardMenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-cream);
+  background: transparent;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cardMenu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.cardMenu .danger {
+  color: #ff9088;
+}
+
+.cardMenu .danger:hover {
+  background: rgba(255, 80, 70, 0.12);
+}
+
+
+.bookmarkRow {
+  position: relative;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  touch-action: none;
+}
+
+.bookmarkRow:active {
+  cursor: grabbing;
+}
+
+.rowDragging {
+  z-index: 20;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+.bookmarkLink {
+  min-width: 0;
+  width: 100%;
+  color: var(--color-cream);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 800;
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.bookmarkLink:hover {
+  color: #ffffff;
+  transform: translateX(4px);
+}
+
+.bookmarkLink img {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.13);
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.bookmarkLink span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowActions {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 3px;
+  padding-left: 24px;
+  background: linear-gradient(to right, transparent, var(--card-tint, rgba(20, 38, 18, 0.92)) 22px);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.bookmarkRow:hover .rowActions,
+.bookmarkRow:focus-within .rowActions {
+  opacity: 1;
+}
+
+.rowActions button {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.rowActions .confirmDelete {
+  width: auto;
+  height: 26px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  color: #ff9088;
+  background: rgba(255, 80, 70, 0.16);
+  font-weight: 800;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rowActions .confirmDelete:hover {
+  color: #ffb0aa;
+  background: rgba(255, 80, 70, 0.28);
+}
+
+.noteTextarea {
+  width: 100%;
+  min-height: 120px;
+  border: 0;
+  outline: 0;
+  resize: none;
+  color: var(--color-cream);
+  background: transparent;
+  font: inherit;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.noteTextarea::placeholder {
+  color: rgba(238, 251, 240, 0.4);
+}
+
+.popoverBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+}
+
+.linkPopover {
+  position: fixed;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 46;
+  width: min(340px, calc(100vw - 40px));
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--chrome-bg, rgba(16, 24, 16, 0.97));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  display: grid;
+  gap: 10px;
+}
+
+.linkPopover input {
+  min-height: 42px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 0 12px;
+  outline: 0;
+}
+
+.linkPopover input::placeholder {
+  color: rgba(238, 251, 240, 0.42);
+}
+
+.popoverActions {
+  display: flex;
+  gap: 8px;
+}
+
+.popoverActions button {
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.popoverActions .popoverPrimary {
+  background: var(--accent-strong, rgba(49, 87, 23, 0.95));
+}
+
+.popoverActions .popoverPrimary:hover {
+  background: rgba(59, 104, 28, 1);
+}
+
+.emptyState {
+  position: absolute;
+  left: 50%;
+  top: 30vh;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+  text-align: center;
+  max-width: 420px;
+}
+
+.emptyState h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.emptyState p {
+  margin: 0;
+  color: rgba(238, 251, 240, 0.66);
+}
+
+.emptyState button {
+  margin-top: 6px;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  color: #0d2418;
+  background: var(--color-cream);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.emptyState button:hover {
+  background: #ffffff;
+}
+
+.emptyAction {
+  min-height: 36px;
+  border: 1px dashed rgba(238, 251, 240, 0.2);
+  border-radius: 10px;
+  color: rgba(238, 251, 240, 0.72);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.emptyAction:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  padding: 24px;
+  background: rgba(2, 8, 5, 0.46);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal {
+  width: min(480px, 100%);
+  max-height: min(680px, 88vh);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  background: var(--chrome-bg, rgba(30, 49, 29, 0.96));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
+  padding: 18px;
+}
+
+.modal > header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 1.16rem;
+}
+
+.modal > header button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.form,
+.searchPanel,
+.settingsPanel {
+  display: grid;
+  gap: 14px;
+  min-height: 0;
+  overflow-y: auto;
+  /* Room for the scrollbar so it doesn't sit flush against control edges. */
+  padding-right: 2px;
+}
+
+.form label {
+  display: grid;
+  gap: 7px;
+  color: rgba(238, 251, 240, 0.68);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.form input,
+.searchPanel input {
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0 13px;
+  outline: 0;
+}
+
+.form button,
+.settingsPanel button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  color: #0d2418;
+  background: var(--color-cream);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.settingsPanel button:nth-child(n + 3) {
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.searchPanel a {
+  min-height: 48px;
+  border-radius: 12px;
+  color: var(--color-cream);
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+
+.searchPanel a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.searchPanel small {
+  color: rgba(238, 251, 240, 0.5);
+}
+
+.calendarCard {
+  width: 100%;
+  min-height: 250px;
+  padding: 16px 22px 16px;
+}
+
+.calendarCard header {
+  display: grid;
+  grid-template-columns: 18px 1fr 18px auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  user-select: none;
+}
+
+.calendarCard h2 {
+  margin: 0;
+  font-size: 1.04rem;
+  text-align: left;
+}
+
+.calendarCard button {
+  border: 0;
+  color: rgba(238, 251, 240, 0.34);
+  background: transparent;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px 8px;
+  align-items: center;
+  text-align: center;
+}
+
+.calendarGrid strong {
+  color: rgba(238, 251, 240, 0.39);
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.calendarGrid span,
+.calendarGrid time {
+  width: 100%;
+  min-width: 0;
+  min-height: 24px;
+  display: grid;
+  place-items: center;
+  color: rgba(238, 251, 240, 0.56);
+  font-size: 0.88rem;
+  line-height: 1;
+}
+
+.calendarGrid time:nth-of-type(n + 5) {
+  color: rgba(238, 251, 240, 0.34);
+}
+
+.calendarGrid .today {
+  border-radius: 8px;
+  color: #ffffff;
+  background: var(--accent-strong, rgba(49, 87, 23, 0.88));
+  font-weight: 900;
+}
+
+.toolbar {
+  position: fixed;
+  right: 10px;
+  bottom: 29px;
+  z-index: 5;
+}
+
+.toolbarRail {
+  display: grid;
+  gap: 22px;
+  justify-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.railButton {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  color: rgba(238, 251, 240, 0.72);
+  background: transparent;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.railButton:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.toggleClosed {
+  width: 38px;
+  height: 38px;
+}
+
+.toggleOpen {
+  width: 44px;
+  height: 44px;
+  color: #0d2418;
+  background: var(--accent-strong, var(--color-mint));
+}
+
+.toggleOpen:hover {
+  color: #0d2418;
+  background: var(--accent-strong, var(--color-mint));
+  transform: translateY(-2px);
+}
+
+.settingsButton {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  color: var(--color-cream);
+  background: var(--chrome-bg, rgba(31, 57, 30, 0.86));
+  margin-top: 6px;
+}
+
+.settingsButton:hover {
+  color: #ffffff;
+  background: rgba(47, 78, 39, 0.95);
+}
+
+.widgetsBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+}
+
+.widgetsPanel {
+  position: fixed;
+  right: 100px;
+  bottom: 40px;
+  z-index: 7;
+  width: 300px;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--chrome-bg, rgba(18, 28, 17, 0.94));
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  display: grid;
+  gap: 14px;
+}
+
+.widgetsPanel h3 {
+  margin: 0;
+  color: rgba(238, 251, 240, 0.5);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.widgetList {
+  display: grid;
+  gap: 8px;
+}
+
+.widgetRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.widgetRow span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-cream);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.addPill {
+  border: 0;
+  min-height: 30px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: var(--color-cream);
+  background: var(--chrome-bg, rgba(31, 57, 30, 0.9));
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.addPill:hover {
+  background: rgba(47, 78, 39, 0.95);
+}
+
+.toggleSwitch {
+  width: 42px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  padding: 3px;
+  display: flex;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.toggleSwitchOn {
+  background: var(--accent-strong, rgba(49, 87, 23, 0.9));
+  justify-content: flex-end;
+}
+
+.toggleKnob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: block;
+}
+
+.locationRow {
+  display: flex;
+  gap: 8px;
+}
+
+.locationRow input {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--color-cream);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0 12px;
+  outline: 0;
+}
+
+.locationRow button {
+  border: 0;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 12px;
+  color: #0d2418;
+  background: var(--color-cream);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .topBar {
+    gap: 28px;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+    padding: 18px;
+  }
+
+  .widgetCluster {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .toolbar {
+    right: 18px;
+    bottom: 18px;
+  }
+}
+
+.slider {
+  flex: 1;
+  max-width: 190px;
+  accent-color: var(--accent-strong, var(--color-mint));
+  background: transparent;
+  cursor: pointer;
+}
+
+.snapshotList {
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.snapshotList > span:first-child {
+  color: rgba(238, 251, 240, 0.5);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.snapshotRow {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 34px !important;
+  padding: 0 10px;
+  border-radius: 8px !important;
+  color: var(--color-cream) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
+
+.snapshotRow:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.snapshotMeta {
+  color: rgba(238, 251, 240, 0.45);
+  font-size: 0.76rem;
+}

@@ -1,0 +1,45 @@
+:root {
+  color-scheme: dark;
+  font-family: "Aptos Display", "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --color-cream: #eefbf0;
+  --color-muted: rgba(238, 251, 240, 0.72);
+  --color-mint: #8ae6b8;
+  --color-emerald: #0c3224;
+  --glass-border: rgba(221, 255, 232, 0.16);
+  --blur-lg: 22px;
+  --shadow-soft: 0 24px 70px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: #03110d;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent-strong, var(--color-mint));
+  outline-offset: 3px;
+}
+
+::selection {
+  color: #062018;
+  background: var(--accent-strong, var(--color-mint));
+}

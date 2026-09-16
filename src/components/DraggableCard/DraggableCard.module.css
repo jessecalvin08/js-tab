@@ -1,0 +1,12 @@
+.draggable {
+  position: relative;
+  width: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.dragging {
+  cursor: grabbing;
+  z-index: 60;
+  filter: drop-shadow(0 28px 60px rgba(0, 0, 0, 0.45));
+}

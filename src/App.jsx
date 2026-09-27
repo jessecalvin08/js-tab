@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Calendar, Clock, Cloud, Columns3, Edit3, Grid2x2Plus, Image, Menu, MoreHorizontal, Pencil, Plus, Search, Settings, Timer, Trash2, X } from 'lucide-react';
+import { Bookmark, Calendar, Clock, Cloud, Columns3, Edit3, Grid2x2Plus, Image, Menu, MoreHorizontal, Pencil, Plus, Search, Settings, Timer, Trash2, X } from 'lucide-react';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WorkspaceSelector } from './components/WorkspaceSelector/WorkspaceSelector.jsx';
 import { SearchBar } from './components/SearchBar/SearchBar.jsx';
@@ -58,6 +58,14 @@ export function App() {
   const { state, dispatch } = useDashboard();
   const [modal, setModal] = useState(null);
   const [query, setQuery] = useState('');
+  const [bookmarkFilter, setBookmarkFilter] = useState('');
+  const [viewMode, setViewMode] = useState(() => {
+    try {
+      return window.localStorage.getItem('js-tab-bookmark-view') === 'icons' ? 'icons' : 'list';
+    } catch {
+      return 'list';
+    }
+  });
   const [toolbarOpen, setToolbarOpen] = useState(false);
   const [monthOffset, setMonthOffset] = useState(0);
   const [launcherOpen, setLauncherOpen] = useState(false);
@@ -502,7 +510,10 @@ export function App() {
 
   function visibleBookmarks(card) {
     const list = bookmarksFor(card);
-    return card.collapsed ? list.slice(0, COLLAPSE_AFTER) : list;
+    const matching = bookmarkFilter.trim()
+      ? list.filter((bookmark) => bookmark.__ghost || `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase()))
+      : list;
+    return card.collapsed && !bookmarkFilter.trim() ? matching.slice(0, COLLAPSE_AFTER) : matching;
   }
 
   function hiddenCount(card) {
@@ -522,6 +533,13 @@ export function App() {
   const allBookmarks = activeWorkspace.cards.flatMap((card) => (
     card.bookmarks.map((bookmark) => ({ ...bookmark, cardTitle: card.title }))
   ));
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('js-tab-bookmark-view', viewMode);
+    } catch {
+      // View preference is best-effort when storage is unavailable.
+    }
+  }, [viewMode]);
   const searchResults = query.trim()
     ? allBookmarks.filter((bookmark) => `${bookmark.title} ${bookmark.url} ${bookmark.cardTitle}`.toLowerCase().includes(query.toLowerCase()))
     : [];
@@ -714,7 +732,9 @@ export function App() {
     }
 
     if (entityId === 'calendar') {
-      return activeWorkspace.calendarHidden ? null : renderCalendarCard();
+      return activeWorkspace.calendarEmptyVisible === true && activeWorkspace.calendarHidden !== true
+        ? renderCalendarCard()
+        : null;
     }
     if (entityId === 'pomodoro') {
       return activeWorkspace.pomodoroEnabled ? renderPomodoroCard() : null;
@@ -734,6 +754,10 @@ export function App() {
       return null;
     }
 
+    if (bookmarkFilter.trim() && !card.bookmarks.some((bookmark) => `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase()))) {
+      return null;
+    }
+
     return (
       <DraggableCard
         key={card.id}
@@ -744,7 +768,7 @@ export function App() {
       >
         {(
           <GlassCard
-            className={`${styles.bookmarkCard} ${urlDropTarget === card.id ? styles.dropTarget : ''}`}
+            className={`${styles.bookmarkCard} ${viewMode === 'icons' ? styles.iconGrid : ''} ${urlDropTarget === card.id ? styles.dropTarget : ''}`}
             style={cardStyle(card.id)}
             // Accepts a link dragged in from another tab or window.
             onDragOver={(event) => {
@@ -863,7 +887,7 @@ export function App() {
                   Add bookmark
                 </button>
               )}
-              {hiddenCount(card) > 0 && (
+              {!bookmarkFilter.trim() && hiddenCount(card) > 0 && (
                 <button
                   type="button"
                   className={styles.showMore}
@@ -1141,6 +1165,10 @@ export function App() {
       )}
       <div className={styles.ambient} aria-hidden="true" />
       <section className={styles.topBar} aria-label="Dashboard controls">
+        <a className={styles.brand} href="#bookmarks" aria-label="J's Tab bookmarks home">
+          <span className={styles.brandMark} aria-hidden="true">J</span>
+          <span className={styles.brandText}><strong>J's Tab</strong><small>BOOKMARK LIBRARY</small></span>
+        </a>
         <WorkspaceSelector />
         {widgetSettings.search && (
           <SearchBar
@@ -1182,19 +1210,58 @@ export function App() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
       >
+        <div className={styles.collectionBar} id="bookmarks">
+          <div className={styles.collectionTitle}>
+            <span className={styles.eyebrow}>YOUR LIBRARY</span>
+            <h1>{activeWorkspace.name}</h1>
+            <p>{allBookmarks.length} saved {allBookmarks.length === 1 ? 'bookmark' : 'bookmarks'} <span aria-hidden="true">·</span> {activeWorkspace.cards.length} folders</p>
+          </div>
+          <div className={styles.collectionControls}>
+            <label className={styles.bookmarkSearch}>
+              <Search size={17} aria-hidden="true" />
+              <input
+                type="search"
+                value={bookmarkFilter}
+                onChange={(event) => setBookmarkFilter(event.target.value)}
+                placeholder="Find a bookmark"
+                aria-label="Find a bookmark"
+              />
+              {bookmarkFilter && <button type="button" aria-label="Clear search" onClick={() => setBookmarkFilter('')}><X size={15} /></button>}
+              <kbd>⌘ K</kbd>
+            </label>
+            <div className={styles.viewToggle} role="group" aria-label="Bookmark display">
+              <button type="button" className={viewMode === 'list' ? styles.viewActive : ''} aria-pressed={viewMode === 'list'} aria-label="List view" onClick={() => setViewMode('list')}><Menu size={17} /></button>
+              <button type="button" className={viewMode === 'icons' ? styles.viewActive : ''} aria-pressed={viewMode === 'icons'} aria-label="Icon view" onClick={() => setViewMode('icons')}><Grid2x2Plus size={17} /></button>
+            </div>
+            <button type="button" className={styles.addFolderButton} onClick={() => setModal({ type: 'card' })}><Plus size={17} /> New folder</button>
+          </div>
+        </div>
         <div className={styles.canvas} aria-label={`${activeWorkspace.name} bookmarks`}>
           {activeWorkspace.cards.length === 0 && (activeWorkspace.notes ?? []).length === 0 && (
             <div className={styles.emptyState}>
-              <h2>Make this tab yours</h2>
-              <p>Add bookmark cards, notes, and widgets to build your own home page.</p>
-              <button type="button" onClick={() => setModal({ type: 'card' })}>Add your first card</button>
+              <span className={styles.emptyMark} aria-hidden="true"><Bookmark size={23} /></span>
+              <h2>Your bookmarks, in one place</h2>
+              <p>Bring in your Chrome folders or make a new folder to get started.</p>
+              <div className={styles.emptyActions}>
+                <button type="button" onClick={handleImportChromeBookmarks}>Import Chrome bookmarks</button>
+                <button type="button" className={styles.emptySecondary} onClick={() => setModal({ type: 'card' })}>Create a folder</button>
+              </div>
+              {importNotice && <p className={styles.notice} role="status">{importNotice}</p>}
             </div>
           )}
-          {displayColumns.map((column, columnIndex) => (
-            <div className={styles.column} data-column={columnIndex} key={columnIndex}>
-              {column.map((entityId) => renderEntity(entityId))}
-            </div>
-          ))}
+          {displayColumns.map((column, columnIndex) => {
+            const visibleIds = column.filter((entityId) => (
+              entityId !== 'calendar' || (activeWorkspace.calendarEmptyVisible === true && activeWorkspace.calendarHidden !== true)
+            ));
+            return (
+              <div className={styles.column} data-column={columnIndex} key={columnIndex} style={visibleIds.length ? undefined : { display: 'none' }}>
+                {visibleIds.map((entityId) => renderEntity(entityId))}
+              </div>
+            );
+          })}
+          {bookmarkFilter.trim() && !allBookmarks.some((bookmark) => `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase())) && (
+            <div className={styles.noResults} role="status">No bookmarks match “{bookmarkFilter}”.</div>
+          )}
         </div>
       </motion.section>
 
@@ -1345,13 +1412,13 @@ export function App() {
         )}
 
         {modal?.type === 'card' && (
-          <DashboardModal title="Add card" onClose={() => setModal(null)}>
+          <DashboardModal title="New folder" onClose={() => setModal(null)}>
             <form className={styles.form} onSubmit={handleCardSubmit}>
               <label>
-                Card name
+                Folder name
                 <input name="title" autoFocus />
               </label>
-              <button type="submit">Create</button>
+              <button type="submit">Create folder</button>
             </form>
           </DashboardModal>
         )}

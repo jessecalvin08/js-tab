@@ -46,11 +46,7 @@ export function computeDefaultColumns(workspace) {
 
   const byArea = new Map(workspace.cards.filter((card) => card.area).map((card) => [card.area, card]));
 
-  [['youtube', 0], ['calendar', 0], ['db', 1], ['ui', 1], ['tools', 2], ['ai', 2], ['web', 3]].forEach(([key, column]) => {
-    if (key === 'calendar') {
-      push('calendar', column);
-      return;
-    }
+  [['youtube', 0], ['db', 1], ['ui', 1], ['tools', 2], ['ai', 2], ['web', 3]].forEach(([key, column]) => {
     const card = byArea.get(key);
     if (card) {
       push(card.id, column);
@@ -130,6 +126,7 @@ const initialWorkspace = {
   name: 'Home',
   cards: defaultCards,
   notes: [],
+  calendarHidden: true,
   columns: computeDefaultColumns({ cards: defaultCards, notes: [] }),
   layoutVersion: LAYOUT_VERSION,
   settings: {}
@@ -190,12 +187,23 @@ function normalizeUrl(url) {
 }
 
 function migrateWorkspace(workspace) {
+  const calendarWasPlaced = workspace.columns?.some((column) => column.includes('calendar')) ?? false;
+  const calendarEmptyVisible = workspace.calendarEmptyVisible
+    ?? (calendarWasPlaced && workspace.calendarHidden !== true);
+
   if (workspace.layoutVersion === LAYOUT_VERSION && Array.isArray(workspace.columns)) {
-    return workspace;
+    return calendarEmptyVisible === workspace.calendarEmptyVisible
+      ? workspace
+      : { ...workspace, calendarEmptyVisible };
   }
 
   const { layout, ...rest } = workspace;
-  return { ...rest, columns: computeDefaultColumns(workspace), layoutVersion: LAYOUT_VERSION };
+  return {
+    ...rest,
+    calendarEmptyVisible,
+    columns: computeDefaultColumns(workspace),
+    layoutVersion: LAYOUT_VERSION
+  };
 }
 
 function updateActiveWorkspace(state, updater) {
@@ -231,6 +239,7 @@ function dashboardReducer(state, action) {
         name: action.payload.name || 'New board',
         cards,
         notes: [],
+        calendarHidden: true,
         columns: computeDefaultColumns({ cards, notes: [] }),
         layoutVersion: LAYOUT_VERSION,
         settings: {}
@@ -453,9 +462,9 @@ function dashboardReducer(state, action) {
       });
     }
     case 'calendar/hide':
-      return updateActiveWorkspace(state, (workspace) => ({ ...workspace, calendarHidden: true }));
+      return updateActiveWorkspace(state, (workspace) => ({ ...workspace, calendarHidden: true, calendarEmptyVisible: false }));
     case 'calendar/show':
-      return updateActiveWorkspace(state, (workspace) => ({ ...workspace, calendarHidden: false }));
+      return updateActiveWorkspace(state, (workspace) => ({ ...workspace, calendarHidden: false, calendarEmptyVisible: true }));
     case 'layout/reset':
       return updateActiveWorkspace(state, (workspace) => ({
         ...workspace,

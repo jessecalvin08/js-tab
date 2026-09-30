@@ -19,6 +19,7 @@
     "storage",
     "favicon",
     "bookmarks",
+    "history",
     "activeTab"
   ],
   "host_permissions": [

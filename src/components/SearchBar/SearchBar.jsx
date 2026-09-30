@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { History, Mic, Plus, ScanSearch, Search, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { searchPages } from '../../services/ChromeHistory.js';
 import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
+import { faviconUrl } from '../../utils/favicon.js';
 import { AiComposer } from './AiComposer.jsx';
 import { PlusMenu } from './PlusMenu.jsx';
 import styles from './SearchBar.module.css';
@@ -32,6 +34,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
   const [focused, setFocused] = useState(false);
   const [composer, setComposer] = useState(null);
   const [history, setHistory] = useState(() => loadHistory('search'));
+  const [pages, setPages] = useState([]);
   const engine = settings?.searchEngine ?? 'google';
   const isGoogle = engine === 'google';
   const canSuggest = isGoogle || engine === 'duckduckgo';
@@ -73,15 +76,35 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     };
   }, [text, engine, canSuggest]);
 
-  // Past searches first (like the omnibox), then live suggestions that are not repeats.
+  useEffect(() => {
+    if (!text.trim()) {
+      setPages([]);
+      return undefined;
+    }
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      searchPages(text).then((found) => {
+        if (!cancelled) {
+          setPages(found);
+        }
+      });
+    }, 120);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [text]);
+
+  // Past searches, then pages you have visited, then live suggestions that are not repeats.
   const items = useMemo(() => {
-    const past = matchHistory(history, text, text.trim() ? 4 : 8).map((value) => ({ value, past: true }));
+    const past = matchHistory(history, text, text.trim() ? 3 : 8).map((value) => ({ kind: 'past', value }));
+    const visited = pages.map((page) => ({ kind: 'page', value: page.title, url: page.url }));
     const seen = new Set(past.map((item) => item.value.toLowerCase()));
     const fresh = suggestions
       .filter((value) => !seen.has(value.toLowerCase()))
-      .map((value) => ({ value, past: false }));
-    return [...past, ...fresh].slice(0, 8);
-  }, [history, suggestions, text]);
+      .map((value) => ({ kind: 'suggest', value }));
+    return [...past, ...visited, ...fresh].slice(0, 8);
+  }, [history, pages, suggestions, text]);
 
   function go(target) {
     if (settings?.openInNewTab) {
@@ -104,7 +127,12 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    search(active >= 0 ? items[active].value : text);
+    const chosen = active >= 0 ? items[active] : null;
+    if (chosen?.kind === 'page') {
+      go(chosen.url);
+      return;
+    }
+    search(chosen ? chosen.value : text);
   }
 
   function handleKeyDown(event) {
@@ -243,16 +271,23 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
       {showSuggestions && (
         <ul className={styles.suggestions} role="listbox">
           {items.map((item, index) => (
-            <li key={`${item.past ? 'h' : 's'}-${item.value}`} role="option" aria-selected={index === active}>
+            <li key={`${item.kind}-${item.url ?? item.value}`} role="option" aria-selected={index === active}>
               <div
                 className={`${styles.suggestion} ${index === active ? styles.suggestionActive : ''}`}
                 onMouseEnter={() => setActive(index)}
               >
-                <button type="button" className={styles.suggestionMain} onClick={() => search(item.value)}>
-                  {item.past ? <History size={17} aria-hidden="true" /> : <Search size={17} aria-hidden="true" />}
+                <button
+                  type="button"
+                  className={styles.suggestionMain}
+                  onClick={() => (item.kind === 'page' ? go(item.url) : search(item.value))}
+                >
+                  {item.kind === 'page' && <img className={styles.pageIcon} src={faviconUrl(item.url)} alt="" />}
+                  {item.kind === 'past' && <History size={17} aria-hidden="true" />}
+                  {item.kind === 'suggest' && <Search size={17} aria-hidden="true" />}
                   <span>{item.value}</span>
+                  {item.kind === 'page' && <small>{item.url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')}</small>}
                 </button>
-                {item.past && (
+                {item.kind === 'past' && (
                   <button
                     type="button"
                     className={styles.suggestionRemove}

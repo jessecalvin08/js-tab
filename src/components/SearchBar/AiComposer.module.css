@@ -320,3 +320,51 @@
 .suggestions button:hover {
   background: #f4f6f8;
 }
+
+.recentRow {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+}
+
+.recentRow:hover {
+  background: #f4f6f8;
+}
+
+.suggestions .recentMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 11px 4px;
+  font-size: 16px;
+}
+
+.suggestions .recentMain:hover {
+  background: transparent;
+}
+
+.recentMain span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestions .recentRemove {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  padding: 0;
+  margin-right: 6px;
+  display: none;
+  place-items: center;
+  justify-content: center;
+  color: #6b7280;
+  border-radius: 50%;
+}
+
+.recentRow:hover .recentRemove {
+  display: grid;
+}
+
+.suggestions .recentRemove:hover {
+  background: rgba(0, 0, 0, 0.08);
+}

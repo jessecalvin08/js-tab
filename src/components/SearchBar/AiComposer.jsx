@@ -1,4 +1,4 @@
-import { ArrowRight, FileText, Mic, Plus, ScanSearch, X } from 'lucide-react';
+import { ArrowRight, FileText, History, Mic, Plus, ScanSearch, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { PlusMenu } from './PlusMenu.jsx';
 import {
@@ -8,6 +8,7 @@ import {
   getGeminiKey,
   saveGeminiKey
 } from '../../services/GeminiService.js';
+import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
 import styles from './AiComposer.module.css';
 
 const FILE_ACCEPT = 'application/pdf,text/*,image/*,.md,.csv,.json';
@@ -36,6 +37,7 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
   const [keyDraft, setKeyDraft] = useState('');
   const [needsKey, setNeedsKey] = useState(false);
   const [accept, setAccept] = useState(FILE_ACCEPT);
+  const [history, setHistory] = useState(() => loadHistory('ai'));
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // Opening from "Add images" / "Add files" goes straight to the file picker. The
@@ -145,6 +147,9 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
     setError('');
     setNeedsKey(false);
     setBusy(true);
+    if (question) {
+      setHistory(addHistory('ai', question));
+    }
     const attached = files;
     let turnAdded = false;
     const controller = new AbortController();
@@ -225,6 +230,7 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
   const suggestions = !turns.length && files.length
     ? (files.every((item) => item.isImage) ? SUGGESTIONS.image : SUGGESTIONS.document)
     : [];
+  const recent = !turns.length && !files.length ? matchHistory(history, text, 6) : [];
   const canSend = (text.trim() || files.length) && !busy;
   const selectedKeys = [mode === 'image' ? 'create-images' : model];
 
@@ -345,6 +351,21 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
       )}
 
       {error && <p className={styles.error} role="alert">{error}</p>}
+
+      {recent.length > 0 && (
+        <ul className={styles.suggestions}>
+          {recent.map((item) => (
+            <li key={item} className={styles.recentRow}>
+              <button type="button" className={styles.recentMain} onClick={() => send(item)}>
+                <History size={20} aria-hidden="true" /> <span>{item}</span>
+              </button>
+              <button type="button" className={styles.recentRemove} aria-label={`Remove ${item} from history`} onClick={() => setHistory(removeHistory('ai', item))}>
+                <X size={15} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {suggestions.length > 0 && (
         <ul className={styles.suggestions}>

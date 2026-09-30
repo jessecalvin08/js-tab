@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Mic, Plus, ScanSearch, Sparkles } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { History, Mic, Plus, ScanSearch, Search, Sparkles, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
 import { AiComposer } from './AiComposer.jsx';
 import { PlusMenu } from './PlusMenu.jsx';
 import styles from './SearchBar.module.css';
@@ -30,6 +31,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
   const [active, setActive] = useState(-1);
   const [focused, setFocused] = useState(false);
   const [composer, setComposer] = useState(null);
+  const [history, setHistory] = useState(() => loadHistory('search'));
   const engine = settings?.searchEngine ?? 'google';
   const isGoogle = engine === 'google';
   const canSuggest = isGoogle || engine === 'duckduckgo';
@@ -71,6 +73,16 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     };
   }, [text, engine, canSuggest]);
 
+  // Past searches first (like the omnibox), then live suggestions that are not repeats.
+  const items = useMemo(() => {
+    const past = matchHistory(history, text, text.trim() ? 4 : 8).map((value) => ({ value, past: true }));
+    const seen = new Set(past.map((item) => item.value.toLowerCase()));
+    const fresh = suggestions
+      .filter((value) => !seen.has(value.toLowerCase()))
+      .map((value) => ({ value, past: false }));
+    return [...past, ...fresh].slice(0, 8);
+  }, [history, suggestions, text]);
+
   function go(target) {
     if (settings?.openInNewTab) {
       window.open(target, '_blank', 'noreferrer');
@@ -84,28 +96,31 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     if (!value) {
       return;
     }
+    if (!/^https?:\/\//i.test(value)) {
+      setHistory(addHistory('search', value));
+    }
     go(/^https?:\/\//i.test(value) ? value : searchUrl(value));
   }
 
   function handleSubmit(event) {
     event.preventDefault();
-    search(active >= 0 ? suggestions[active] : text);
+    search(active >= 0 ? items[active].value : text);
   }
 
   function handleKeyDown(event) {
     if (event.key === 'Escape') {
-      setSuggestions([]);
+      setFocused(false);
       setMenuOpen(false);
       return;
     }
-    if (!suggestions.length || !(event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+    if (!items.length || !(event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
       return;
     }
     event.preventDefault();
     const step = event.key === 'ArrowDown' ? 1 : -1;
     // -1 is the typed text itself; arrows cycle through it and the suggestions.
     setActive((current) => {
-      const slots = suggestions.length + 1;
+      const slots = items.length + 1;
       return ((current + 1 + step + slots) % slots) - 1;
     });
   }
@@ -164,7 +179,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     recognition.start();
   }
 
-  const showSuggestions = focused && !menuOpen && suggestions.length > 0;
+  const showSuggestions = focused && !menuOpen && !composer && items.length > 0;
 
   return (
     <motion.form
@@ -193,6 +208,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
         value={text}
         onChange={(event) => setText(event.target.value)}
         onFocus={() => { setFocused(true); setMenuOpen(false); }}
+        onClick={() => setFocused(true)}
         onKeyDown={handleKeyDown}
         placeholder={voiceError || (listening ? 'Listening…' : (isGoogle ? 'Ask Google' : `Search ${engineLabel}`))}
         aria-label={`Search ${engineLabel} or open a URL`}
@@ -226,16 +242,27 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
 
       {showSuggestions && (
         <ul className={styles.suggestions} role="listbox">
-          {suggestions.map((suggestion, index) => (
-            <li key={suggestion} role="option" aria-selected={index === active}>
-              <button
-                type="button"
+          {items.map((item, index) => (
+            <li key={`${item.past ? 'h' : 's'}-${item.value}`} role="option" aria-selected={index === active}>
+              <div
                 className={`${styles.suggestion} ${index === active ? styles.suggestionActive : ''}`}
                 onMouseEnter={() => setActive(index)}
-                onClick={() => search(suggestion)}
               >
-                {suggestion}
-              </button>
+                <button type="button" className={styles.suggestionMain} onClick={() => search(item.value)}>
+                  {item.past ? <History size={17} aria-hidden="true" /> : <Search size={17} aria-hidden="true" />}
+                  <span>{item.value}</span>
+                </button>
+                {item.past && (
+                  <button
+                    type="button"
+                    className={styles.suggestionRemove}
+                    aria-label={`Remove ${item.value} from history`}
+                    onClick={() => setHistory(removeHistory('search', item.value))}
+                  >
+                    <X size={15} />
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>

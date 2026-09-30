@@ -822,8 +822,9 @@
   height: 40px;
   border: 0;
   border-radius: 50%;
-  color: rgba(238, 251, 240, 0.72);
+  color: var(--rail-ink, rgba(238, 251, 240, 0.72));
   background: transparent;
+  filter: var(--rail-halo, none);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -831,8 +832,8 @@
 }
 
 .railButton:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
+  color: var(--rail-ink, #ffffff);
+  background: color-mix(in srgb, var(--rail-ink, #ffffff) 14%, transparent);
   transform: translateY(-2px);
 }
 
@@ -858,14 +859,16 @@
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  color: var(--color-cream);
+  color: var(--panel-ink);
   background: var(--chrome-bg, rgba(31, 57, 30, 0.86));
   margin-top: 6px;
 }
 
 .settingsButton:hover {
-  color: #ffffff;
-  background: rgba(47, 78, 39, 0.95);
+  color: var(--panel-ink);
+  background:
+    linear-gradient(color-mix(in srgb, var(--panel-ink) 16%, transparent), color-mix(in srgb, var(--panel-ink) 16%, transparent)),
+    var(--chrome-bg, rgba(31, 57, 30, 0.9));
 }
 
 .widgetsBackdrop {
@@ -935,7 +938,10 @@
 }
 
 .addPill:hover {
-  background: rgba(47, 78, 39, 0.95);
+  color: var(--panel-ink);
+  background:
+    linear-gradient(color-mix(in srgb, var(--panel-ink) 16%, transparent), color-mix(in srgb, var(--panel-ink) 16%, transparent)),
+    var(--chrome-bg, rgba(31, 57, 30, 0.9));
 }
 
 .toggleSwitch {

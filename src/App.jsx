@@ -10,6 +10,7 @@ import { useClock } from './hooks/useClock.js';
 import { useWallpaperMedia } from './hooks/useWallpaperMedia.js';
 import { useAdaptiveTheme } from './hooks/useAdaptiveTheme.js';
 import { useWallpaperSampler } from './hooks/useWallpaperSampler.js';
+import { inkFor } from './utils/palette.js';
 import { useWeather } from './hooks/useWeather.js';
 import { BookmarkService } from './services/BookmarkService.js';
 import { BackupService, SnapshotService } from './services/BackupService.js';
@@ -403,7 +404,7 @@ export function App() {
 
   // Each card takes its colour from the patch of wallpaper directly behind it,
   // so moving a card to a different part of the background re-tints it.
-  const { sampleRect, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
+  const { sampleRect, sampleLuminance, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
   const [cardTints, setCardTints] = useState(cachedTints?.cards ?? {});
 
   const recomputeTints = useCallback(() => {
@@ -444,6 +445,19 @@ export function App() {
       }
     }
 
+    // Side-rail buttons have no surface of their own, so each one picks light or
+    // dark ink from the wallpaper directly behind it. Written straight onto the
+    // element: no re-render, and it also covers buttons that mount later.
+    document.querySelectorAll(`.${styles.railButton}`).forEach((button) => {
+      const luminance = sampleLuminance(button.getBoundingClientRect());
+      if (luminance == null) {
+        return;
+      }
+      const { ink, halo } = inkFor(luminance);
+      button.style.setProperty('--rail-ink', ink);
+      button.style.setProperty('--rail-halo', halo);
+    });
+
     if (Object.keys(next).length || chrome) {
       try {
         window.localStorage.setItem(TINT_CACHE_KEY, JSON.stringify({
@@ -455,7 +469,7 @@ export function App() {
         // cache is best-effort
       }
     }
-  }, [sampleRect, wallpaperKey]);
+  }, [sampleRect, sampleLuminance, wallpaperKey]);
 
   const cardStyle = (id) => {
     const tint = cardTints[id];
@@ -472,7 +486,7 @@ export function App() {
       clearTimeout(settle);
       clearTimeout(afterAnimation);
     };
-  }, [recomputeTints, samplerVersion, activeWorkspace.columns, activeWorkspace.cards, activeWorkspace.notes]);
+  }, [recomputeTints, samplerVersion, toolbarOpen, activeWorkspace.columns, activeWorkspace.cards, activeWorkspace.notes]);
 
   useEffect(() => {
     const onResize = () => recomputeTints();

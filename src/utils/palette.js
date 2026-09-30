@@ -130,6 +130,25 @@ export function tintFor(colour, luminance) {
   return `hsl(${colour.h} ${saturation}% ${lightness}% / 0.78)`;
 }
 
+const LIGHT_INK = {
+  ink: '#f7f9fc',
+  halo: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55)) drop-shadow(0 0 6px rgba(0, 0, 0, 0.35))'
+};
+
+const DARK_INK = {
+  ink: '#121826',
+  halo: 'drop-shadow(0 1px 2px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.35))'
+};
+
+// Whichever of light/dark ink has the higher WCAG contrast against a background
+// of the given relative luminance, plus an opposite halo (a CSS filter value)
+// for busy wallpapers.
+export function inkFor(luminance) {
+  const contrastWithLight = 1.05 / (luminance + 0.05);
+  const contrastWithDark = (luminance + 0.05) / 0.058;
+  return contrastWithLight >= contrastWithDark ? LIGHT_INK : DARK_INK;
+}
+
 export function buildTheme(palette) {
   if (!palette?.colours?.length) {
     return null;

@@ -189,7 +189,7 @@
   color: rgba(238, 251, 240, 0.7);
   font-weight: 700;
   font-size: 0.84rem;
-  background: linear-gradient(135deg, rgba(31, 57, 30, 0.9), rgba(12, 50, 36, 0.9));
+  background: var(--chrome-bg, linear-gradient(135deg, rgba(31, 57, 30, 0.9), rgba(12, 50, 36, 0.9)));
 }
 
 .badge {

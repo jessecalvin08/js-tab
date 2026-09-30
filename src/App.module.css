@@ -1108,19 +1108,21 @@
 .topBar {
   width: min(100%, 1280px);
   max-width: 1280px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 520px) 1fr;
   gap: clamp(12px, 2vw, 28px);
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(34, 48, 70, 0.08);
 }
 
 .topBar > form {
-  flex: 1 1 auto;
-  max-width: 520px;
+  grid-column: 2;
+  width: 100%;
 }
 
 .topBar .widgetCluster {
-  margin-left: auto;
+  grid-column: 3;
+  justify-self: end;
 }
 
 .dashboard {

@@ -59,7 +59,6 @@ export function App() {
   const { state, dispatch } = useDashboard();
   const [modal, setModal] = useState(null);
   const [query, setQuery] = useState('');
-  const [bookmarkFilter, setBookmarkFilter] = useState('');
   const [viewMode, setViewMode] = useState(() => {
     try {
       return window.localStorage.getItem('js-tab-bookmark-view') === 'icons' ? 'icons' : 'list';
@@ -548,10 +547,7 @@ export function App() {
 
   function visibleBookmarks(card) {
     const list = bookmarksFor(card);
-    const matching = bookmarkFilter.trim()
-      ? list.filter((bookmark) => bookmark.__ghost || `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase()))
-      : list;
-    return card.collapsed && !bookmarkFilter.trim() ? matching.slice(0, COLLAPSE_AFTER) : matching;
+    return card.collapsed ? list.slice(0, COLLAPSE_AFTER) : list;
   }
 
   function hiddenCount(card) {
@@ -792,10 +788,6 @@ export function App() {
       return null;
     }
 
-    if (bookmarkFilter.trim() && !card.bookmarks.some((bookmark) => `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase()))) {
-      return null;
-    }
-
     return (
       <DraggableCard
         key={card.id}
@@ -933,7 +925,7 @@ export function App() {
                   Add bookmark
                 </button>
               )}
-              {!bookmarkFilter.trim() && hiddenCount(card) > 0 && (
+              {hiddenCount(card) > 0 && (
                 <button
                   type="button"
                   className={styles.showMore}
@@ -1293,9 +1285,6 @@ export function App() {
               </div>
             );
           })}
-          {bookmarkFilter.trim() && !allBookmarks.some((bookmark) => `${bookmark.title} ${bookmark.url}`.toLowerCase().includes(bookmarkFilter.trim().toLowerCase())) && (
-            <div className={styles.noResults} role="status">No bookmarks match “{bookmarkFilter}”.</div>
-          )}
         </div>
       </motion.section>
 

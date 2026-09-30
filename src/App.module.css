@@ -122,9 +122,18 @@
   cursor: pointer;
 }
 
-.segmentOn {
+.segmented button.segmentOn {
   color: var(--color-cream) !important;
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.segmented button:hover {
+  color: var(--color-cream) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.segmented button.segmentOn:hover {
+  background: rgba(255, 255, 255, 0.22) !important;
 }
 
 .fileButton {

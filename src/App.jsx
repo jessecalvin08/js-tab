@@ -1173,6 +1173,13 @@ export function App() {
       )}
       <div className={styles.ambient} aria-hidden="true" />
       <section className={styles.topBar} aria-label="Dashboard controls">
+        <div className={styles.collectionControls} id="bookmarks">
+          <div className={styles.viewToggle} role="group" aria-label="Bookmark display">
+            <button type="button" className={viewMode === 'list' ? styles.viewActive : ''} aria-pressed={viewMode === 'list'} aria-label="List view" onClick={() => setViewMode('list')}><Menu size={17} /></button>
+            <button type="button" className={viewMode === 'icons' ? styles.viewActive : ''} aria-pressed={viewMode === 'icons'} aria-label="Icon view" onClick={() => setViewMode('icons')}><Grid2x2Plus size={17} /></button>
+          </div>
+          <button type="button" className={styles.addFolderButton} onClick={() => setModal({ type: 'card' })}><Plus size={17} /> New folder</button>
+        </div>
         {widgetSettings.search && (
           <SearchBar
             settings={settings}
@@ -1213,15 +1220,6 @@ export function App() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
       >
-        <div className={styles.collectionBar} id="bookmarks">
-          <div className={styles.collectionControls}>
-            <div className={styles.viewToggle} role="group" aria-label="Bookmark display">
-              <button type="button" className={viewMode === 'list' ? styles.viewActive : ''} aria-pressed={viewMode === 'list'} aria-label="List view" onClick={() => setViewMode('list')}><Menu size={17} /></button>
-              <button type="button" className={viewMode === 'icons' ? styles.viewActive : ''} aria-pressed={viewMode === 'icons'} aria-label="Icon view" onClick={() => setViewMode('icons')}><Grid2x2Plus size={17} /></button>
-            </div>
-            <button type="button" className={styles.addFolderButton} onClick={() => setModal({ type: 'card' })}><Plus size={17} /> New folder</button>
-          </div>
-        </div>
         <div className={styles.canvas} aria-label={`${activeWorkspace.name} bookmarks`}>
           {activeWorkspace.cards.length === 0 && (activeWorkspace.notes ?? []).length === 0 && (
             <div className={styles.emptyState}>

@@ -1093,10 +1093,19 @@
 .topBar {
   width: min(100%, 1280px);
   max-width: 1280px;
-  grid-template-columns: minmax(220px, 1fr) auto;
+  display: flex;
   gap: clamp(12px, 2vw, 28px);
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(34, 48, 70, 0.08);
+}
+
+.topBar > form {
+  flex: 1 1 auto;
+  max-width: 520px;
+}
+
+.topBar .widgetCluster {
+  margin-left: auto;
 }
 
 .dashboard {
@@ -1105,18 +1114,10 @@
   padding-top: 30px;
 }
 
-.collectionBar {
-  display: flex;
-  align-items: end;
-  justify-content: flex-end;
-  gap: 22px;
-  padding: 8px 0 22px;
-}
-
 .collectionControls {
   display: flex;
+  flex: none;
   align-items: center;
-  justify-content: flex-end;
   gap: 10px;
 }
 
@@ -1475,6 +1476,7 @@
   }
 
   .topBar {
+    display: grid;
     grid-template-columns: 1fr auto;
     gap: 12px;
     padding-bottom: 14px;
@@ -1487,26 +1489,19 @@
   .topBar > :global(form) {
     grid-column: 1 / -1;
     grid-row: 2;
+    max-width: none;
   }
 
   .dashboard {
     padding-top: 20px;
   }
 
-  .collectionBar {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 15px;
-    padding-bottom: 16px;
-  }
-
   .collectionControls {
-    justify-content: stretch;
-    flex-wrap: wrap;
+    grid-column: 1 / -1;
   }
 
   .addFolderButton {
-    flex: 1 1 100%;
+    flex: 1 1 auto;
     justify-content: center;
   }
 

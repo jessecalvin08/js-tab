@@ -1497,13 +1497,18 @@
 }
 
 .iconGrid .bookmarkRow {
-  min-height: 64px;
-  justify-content: center;
-  padding: 5px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 76px;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 6px 5px 3px;
 }
 
 .iconGrid .bookmarkLink {
-  min-height: 52px;
+  min-height: 0;
+  flex: 1 1 0;
   width: 100%;
   flex-direction: column;
   justify-content: center;
@@ -1523,8 +1528,19 @@
 }
 
 .iconGrid .rowActions {
-  padding-left: 6px;
-  background: linear-gradient(to right, transparent, #f1f3f8 18px);
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  padding: 0;
+  gap: 2px;
+  background: none;
+  transform: none;
+}
+
+.iconGrid .rowActions button {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
 }
 
 .iconGrid .bookmarkRow:hover {

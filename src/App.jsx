@@ -844,6 +844,9 @@ export function App() {
                     className={styles.bookmarkLink}
                     title={bookmark.description || undefined}
                     draggable={false}
+                    onPointerDown={(event) => {
+                      if (viewMode === 'icons') event.stopPropagation();
+                    }}
                     target={settings.openInNewTab ? '_blank' : undefined}
                     rel={settings.openInNewTab ? 'noreferrer' : undefined}
                   >
@@ -855,7 +858,12 @@ export function App() {
                     />
                     <span>{bookmark.title}</span>
                   </a>
-                  <div className={styles.rowActions}>
+                  <div
+                    className={styles.rowActions}
+                    onPointerDown={(event) => {
+                      if (viewMode === 'icons') event.stopPropagation();
+                    }}
+                  >
                     {confirmBookmarkId === bookmark.id ? (
                       <button
                         type="button"

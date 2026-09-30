@@ -202,3 +202,20 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.answer strong {
+  color: #1f2430;
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.answer small {
+  margin-left: 0;
+}
+
+.answer em {
+  margin-left: auto;
+  color: #2f6df0;
+  font-size: 12px;
+  font-style: normal;
+}

@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion';
-import { History, Mic, Plus, ScanSearch, Search, Sparkles, X } from 'lucide-react';
+import { Calculator, History, Mic, Plus, ScanSearch, Search, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchPages } from '../../services/ChromeHistory.js';
 import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
 import { faviconUrl } from '../../utils/favicon.js';
+import { quickAnswer } from '../../utils/quickAnswer.js';
 import { AiComposer } from './AiComposer.jsx';
 import { PlusMenu } from './PlusMenu.jsx';
 import styles from './SearchBar.module.css';
@@ -35,6 +36,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
   const [composer, setComposer] = useState(null);
   const [history, setHistory] = useState(() => loadHistory('search'));
   const [pages, setPages] = useState([]);
+  const [copied, setCopied] = useState(false);
   const engine = settings?.searchEngine ?? 'google';
   const isGoogle = engine === 'google';
   const canSuggest = isGoogle || engine === 'duckduckgo';
@@ -103,8 +105,17 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     const fresh = suggestions
       .filter((value) => !seen.has(value.toLowerCase()))
       .map((value) => ({ kind: 'suggest', value }));
-    return [...past, ...visited, ...fresh].slice(0, 8);
+    const answer = quickAnswer(text);
+    const head = answer ? [{ kind: 'answer', value: answer.result, label: answer.label, copy: answer.copy }] : [];
+    return [...head, ...past, ...visited, ...fresh].slice(0, 8);
   }, [history, pages, suggestions, text]);
+
+  function copyAnswer(item) {
+    navigator.clipboard?.writeText(item.copy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
+  }
 
   function go(target) {
     if (settings?.openInNewTab) {
@@ -132,6 +143,10 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
       go(chosen.url);
       return;
     }
+    if (chosen?.kind === 'answer') {
+      copyAnswer(chosen);
+      return;
+    }
     search(chosen ? chosen.value : text);
   }
 
@@ -153,10 +168,27 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     });
   }
 
-  function openComposer(intent = null) {
+  function openComposer(intent = null, files = []) {
     setMenuOpen(false);
     setSuggestions([]);
-    setComposer({ intent, text });
+    setComposer({ intent, text, files });
+  }
+
+  // Pasting or dropping an image opens the AI panel with it attached.
+  function handlePaste(event) {
+    const pasted = Array.from(event.clipboardData?.files ?? []);
+    if (pasted.length) {
+      event.preventDefault();
+      openComposer(null, pasted);
+    }
+  }
+
+  function handleDrop(event) {
+    const dropped = Array.from(event.dataTransfer?.files ?? []);
+    if (dropped.length) {
+      event.preventDefault();
+      openComposer(null, dropped);
+    }
   }
 
   function closeComposer() {
@@ -214,6 +246,8 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
       ref={formRef}
       className={styles.search}
       onSubmit={handleSubmit}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={handleDrop}
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
@@ -237,6 +271,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
         onChange={(event) => setText(event.target.value)}
         onFocus={() => { setFocused(true); setMenuOpen(false); }}
         onClick={() => setFocused(true)}
+        onPaste={handlePaste}
         onKeyDown={handleKeyDown}
         placeholder={voiceError || (listening ? 'Listening…' : (isGoogle ? 'Ask Google' : `Search ${engineLabel}`))}
         aria-label={`Search ${engineLabel} or open a URL`}
@@ -266,7 +301,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
 
       {menuOpen && <PlusMenu onSelect={openComposer} />}
 
-      {composer && <AiComposer initialText={composer.text} intent={composer.intent} onClose={closeComposer} />}
+      {composer && <AiComposer initialText={composer.text} intent={composer.intent} initialFiles={composer.files} onClose={closeComposer} />}
 
       {showSuggestions && (
         <ul className={styles.suggestions} role="listbox">
@@ -276,6 +311,14 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
                 className={`${styles.suggestion} ${index === active ? styles.suggestionActive : ''}`}
                 onMouseEnter={() => setActive(index)}
               >
+                {item.kind === 'answer' ? (
+                  <button type="button" className={`${styles.suggestionMain} ${styles.answer}`} onClick={() => copyAnswer(item)}>
+                    <Calculator size={17} aria-hidden="true" />
+                    <small>{item.label} =</small>
+                    <strong>{item.value}</strong>
+                    <em>{copied ? 'Copied' : 'Click to copy'}</em>
+                  </button>
+                ) : (
                 <button
                   type="button"
                   className={styles.suggestionMain}
@@ -287,6 +330,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
                   <span>{item.value}</span>
                   {item.kind === 'page' && <small>{item.url.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '')}</small>}
                 </button>
+                )}
                 {item.kind === 'past' && (
                   <button
                     type="button"

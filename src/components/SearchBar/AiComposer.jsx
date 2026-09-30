@@ -19,13 +19,25 @@ const SUGGESTIONS = {
   image: ['What is in this image?', 'Describe this image in detail', 'Extract any text from this image']
 };
 
-export function AiComposer({ initialText = '', intent = null, onClose }) {
+function makeEntry(file) {
+  const isImage = file.type.startsWith('image/');
+  return {
+    id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 7)}`,
+    file,
+    isImage,
+    previewUrl: isImage ? URL.createObjectURL(file) : null
+  };
+}
+
+export function AiComposer({ initialText = '', intent = null, initialFiles = [], onClose }) {
   const fileInputRef = useRef(null);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const controllerRef = useRef(null);
   const [text, setText] = useState(initialText);
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState(() => initialFiles.filter((file) => file.size <= MAX_ATTACHMENT_BYTES).map(makeEntry));
+  const filesRef = useRef(files);
+  filesRef.current = files;
   const [mode, setMode] = useState(intent === 'create-images' ? 'image' : 'chat');
   const [model, setModel] = useState(intent === 'pro' ? 'pro' : 'fast');
   const [turns, setTurns] = useState([]);
@@ -55,7 +67,7 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => () => files.forEach((item) => item.previewUrl && URL.revokeObjectURL(item.previewUrl)), [files]);
+  useEffect(() => () => filesRef.current.forEach((item) => item.previewUrl && URL.revokeObjectURL(item.previewUrl)), []);
 
   function openPicker(nextAccept) {
     setAccept(nextAccept);
@@ -81,26 +93,36 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
     }
   }
 
+  function addFiles(picked) {
+    const tooBig = picked.find((file) => file.size > MAX_ATTACHMENT_BYTES);
+    setError(tooBig ? `${tooBig.name} is larger than 15 MB.` : '');
+    setFiles((current) => [
+      ...current,
+      ...picked.filter((file) => file.size <= MAX_ATTACHMENT_BYTES).map(makeEntry)
+    ]);
+    inputRef.current?.focus();
+  }
+
   function handleFiles(event) {
     const picked = Array.from(event.target.files ?? []);
     event.target.value = '';
-    const tooBig = picked.find((file) => file.size > MAX_ATTACHMENT_BYTES);
-    if (tooBig) {
-      setError(`${tooBig.name} is larger than 15 MB.`);
-    } else {
-      setError('');
+    addFiles(picked);
+  }
+
+  function handlePaste(event) {
+    const pasted = Array.from(event.clipboardData?.files ?? []);
+    if (pasted.length) {
+      event.preventDefault();
+      addFiles(pasted);
     }
-    const accepted = picked.filter((file) => file.size <= MAX_ATTACHMENT_BYTES);
-    setFiles((current) => [
-      ...current,
-      ...accepted.map((file) => ({
-        id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 7)}`,
-        file,
-        isImage: file.type.startsWith('image/'),
-        previewUrl: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
-      }))
-    ]);
-    inputRef.current?.focus();
+  }
+
+  function handleDrop(event) {
+    const dropped = Array.from(event.dataTransfer?.files ?? []);
+    if (dropped.length) {
+      event.preventDefault();
+      addFiles(dropped);
+    }
   }
 
   function removeFile(id) {
@@ -235,7 +257,7 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
   const selectedKeys = [mode === 'image' ? 'create-images' : model];
 
   return (
-    <div className={styles.panel} role="dialog" aria-label="Ask Gemini">
+    <div className={styles.panel} role="dialog" aria-label="Ask Gemini" onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
       <input ref={fileInputRef} type="file" accept={accept} multiple hidden onChange={handleFiles} />
 
       <div className={styles.head}>
@@ -258,6 +280,7 @@ export function AiComposer({ initialText = '', intent = null, onClose }) {
           value={text}
           onChange={(event) => setText(event.target.value)}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           onFocus={() => setMenuOpen(false)}
           placeholder={listening ? 'Listening…' : (mode === 'image' ? 'Describe an image to create' : 'Ask anything')}
           aria-label="Ask anything"

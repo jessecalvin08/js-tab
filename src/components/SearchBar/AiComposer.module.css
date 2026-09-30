@@ -327,7 +327,8 @@
   border-radius: 12px;
 }
 
-.recentRow:hover {
+.recentRow:hover,
+.recentActive {
   background: #f4f6f8;
 }
 
@@ -361,7 +362,8 @@
   border-radius: 50%;
 }
 
-.recentRow:hover .recentRemove {
+.recentRow:hover .recentRemove,
+.recentActive .recentRemove {
   display: grid;
 }
 

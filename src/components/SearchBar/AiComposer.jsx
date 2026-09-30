@@ -1,5 +1,5 @@
-import { ArrowRight, FileText, History, Mic, Plus, ScanSearch, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { ArrowRight, FileText, History, Mic, Plus, ScanSearch, Search, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PlusMenu } from './PlusMenu.jsx';
 import {
   MAX_ATTACHMENT_BYTES,
@@ -9,6 +9,7 @@ import {
   saveGeminiKey
 } from '../../services/GeminiService.js';
 import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
+import { fetchSuggestions } from '../../services/Suggestions.js';
 import styles from './AiComposer.module.css';
 
 const FILE_ACCEPT = 'application/pdf,text/*,image/*,.md,.csv,.json';
@@ -50,6 +51,8 @@ export function AiComposer({ initialText = '', intent = null, initialFiles = [],
   const [needsKey, setNeedsKey] = useState(false);
   const [accept, setAccept] = useState(FILE_ACCEPT);
   const [history, setHistory] = useState(() => loadHistory('ai'));
+  const [live, setLive] = useState([]);
+  const [active, setActive] = useState(-1);
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   // Opening from "Add images" / "Add files" goes straight to the file picker. The
@@ -68,6 +71,27 @@ export function AiComposer({ initialText = '', intent = null, initialFiles = [],
   }, []);
 
   useEffect(() => () => filesRef.current.forEach((item) => item.previewUrl && URL.revokeObjectURL(item.previewUrl)), []);
+
+  useEffect(() => {
+    const query = text.trim();
+    if (!query || mode === 'image') {
+      setLive([]);
+      return undefined;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      fetchSuggestions('google', query, controller.signal)
+        .then((list) => {
+          setLive(list.slice(0, 6));
+          setActive(-1);
+        })
+        .catch(() => {});
+    }, 150);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [text, mode]);
 
   function openPicker(nextAccept) {
     setAccept(nextAccept);
@@ -243,16 +267,35 @@ export function AiComposer({ initialText = '', intent = null, initialFiles = [],
   function handleKeyDown(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      send();
+      send(active >= 0 && rows[active] ? rows[active].value : undefined);
     } else if (event.key === 'Escape') {
       onClose();
+    } else if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && rows.length) {
+      event.preventDefault();
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      // -1 is the typed text itself.
+      setActive((current) => {
+        const slots = rows.length + 1;
+        return ((current + 1 + step + slots) % slots) - 1;
+      });
     }
   }
 
   const suggestions = !turns.length && files.length
     ? (files.every((item) => item.isImage) ? SUGGESTIONS.image : SUGGESTIONS.document)
     : [];
-  const recent = !turns.length && !files.length ? matchHistory(history, text, 6) : [];
+  // Past prompts first, then live suggestions that are not repeats.
+  const rows = useMemo(() => {
+    if (turns.length || files.length) {
+      return [];
+    }
+    const past = matchHistory(history, text, text.trim() ? 3 : 6).map((value) => ({ kind: 'past', value }));
+    const seen = new Set(past.map((row) => row.value.toLowerCase()));
+    const fresh = live
+      .filter((value) => !seen.has(value.toLowerCase()))
+      .map((value) => ({ kind: 'suggest', value }));
+    return [...past, ...fresh].slice(0, 6);
+  }, [history, live, text, turns.length, files.length]);
   const canSend = (text.trim() || files.length) && !busy;
   const selectedKeys = [mode === 'image' ? 'create-images' : model];
 
@@ -375,16 +418,25 @@ export function AiComposer({ initialText = '', intent = null, initialFiles = [],
 
       {error && <p className={styles.error} role="alert">{error}</p>}
 
-      {recent.length > 0 && (
-        <ul className={styles.suggestions}>
-          {recent.map((item) => (
-            <li key={item} className={styles.recentRow}>
-              <button type="button" className={styles.recentMain} onClick={() => send(item)}>
-                <History size={20} aria-hidden="true" /> <span>{item}</span>
+      {rows.length > 0 && (
+        <ul className={styles.suggestions} role="listbox">
+          {rows.map((row, index) => (
+            <li
+              key={`${row.kind}-${row.value}`}
+              className={`${styles.recentRow} ${index === active ? styles.recentActive : ''}`}
+              role="option"
+              aria-selected={index === active}
+              onMouseEnter={() => setActive(index)}
+            >
+              <button type="button" className={styles.recentMain} onClick={() => send(row.value)}>
+                {row.kind === 'past' ? <History size={20} aria-hidden="true" /> : <Search size={20} aria-hidden="true" />}
+                <span>{row.value}</span>
               </button>
-              <button type="button" className={styles.recentRemove} aria-label={`Remove ${item} from history`} onClick={() => setHistory(removeHistory('ai', item))}>
-                <X size={15} />
-              </button>
+              {row.kind === 'past' && (
+                <button type="button" className={styles.recentRemove} aria-label={`Remove ${row.value} from history`} onClick={() => setHistory(removeHistory('ai', row.value))}>
+                  <X size={15} />
+                </button>
+              )}
             </li>
           ))}
         </ul>

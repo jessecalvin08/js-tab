@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Calculator, History, Mic, Plus, ScanSearch, Search, Sparkles, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { searchPages } from '../../services/ChromeHistory.js';
+import { fetchSuggestions } from '../../services/Suggestions.js';
 import { addHistory, loadHistory, matchHistory, removeHistory } from '../../services/SearchHistory.js';
 import { faviconUrl } from '../../utils/favicon.js';
 import { quickAnswer } from '../../utils/quickAnswer.js';
@@ -10,17 +11,6 @@ import { PlusMenu } from './PlusMenu.jsx';
 import styles from './SearchBar.module.css';
 
 const LENS_URL = 'https://lens.google.com/';
-
-async function fetchSuggestions(engine, query, signal) {
-  if (engine === 'duckduckgo') {
-    const response = await fetch(`https://duckduckgo.com/ac/?q=${encodeURIComponent(query)}&type=list`, { signal });
-    const data = await response.json();
-    return Array.isArray(data?.[1]) ? data[1] : [];
-  }
-  const response = await fetch(`https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}`, { signal });
-  const data = await response.json();
-  return Array.isArray(data?.[1]) ? data[1] : [];
-}
 
 export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
   const formRef = useRef(null);

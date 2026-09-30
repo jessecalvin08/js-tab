@@ -25,6 +25,8 @@
     "https://api.open-meteo.com/*",
     "https://geocoding-api.open-meteo.com/*",
     "https://www.google.com/*",
+    "https://suggestqueries.google.com/*",
+    "https://duckduckgo.com/*",
     "https://picsum.photos/*",
     "https://fastly.picsum.photos/*"
   ]

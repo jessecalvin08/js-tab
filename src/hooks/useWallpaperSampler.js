@@ -174,8 +174,8 @@ export function useWallpaperSampler(media) {
     };
   }, [media, paint]);
 
-  // Average the wallpaper under a card's on-screen rectangle.
-  const sampleRect = useCallback((rect) => {
+  // Raw pixels of the wallpaper under an on-screen rectangle.
+  const readRect = useCallback((rect) => {
     const canvas = canvasRef.current;
     if (!canvas || !rect || rect.width <= 0 || rect.height <= 0) {
       return null;
@@ -194,10 +194,43 @@ export function useWallpaperSampler(media) {
     const w = Math.max(1, Math.min(canvas.width - x, Math.round(rect.width * scaleX)));
     const h = Math.max(1, Math.min(canvas.height - y, Math.round(rect.height * scaleY)));
 
-    let pixels;
     try {
-      pixels = context.getImageData(x, y, w, h).data;
+      return context.getImageData(x, y, w, h).data;
     } catch {
+      return null;
+    }
+  }, []);
+
+  // WCAG relative luminance (0 black – 1 white) of the wallpaper under a rect,
+  // used to pick text that stays readable on bare background.
+  const sampleLuminance = useCallback((rect) => {
+    const pixels = readRect(rect);
+    if (!pixels) {
+      return null;
+    }
+
+    const linear = (value) => {
+      const c = value / 255;
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+
+    let total = 0;
+    let count = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      if (pixels[i + 3] < 125) {
+        continue;
+      }
+      total += 0.2126 * linear(pixels[i]) + 0.7152 * linear(pixels[i + 1]) + 0.0722 * linear(pixels[i + 2]);
+      count += 1;
+    }
+
+    return count ? total / count : null;
+  }, [readRect]);
+
+  // Average the wallpaper under a card's on-screen rectangle.
+  const sampleRect = useCallback((rect) => {
+    const pixels = readRect(rect);
+    if (!pixels) {
       return null;
     }
 
@@ -227,7 +260,7 @@ export function useWallpaperSampler(media) {
     const hsl = rgbToHsl(r, g, b);
     const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     return tintFor(hsl, luminance);
-  }, []);
+  }, [readRect]);
 
-  return { sampleRect, version, ready: Boolean(canvasRef.current) };
+  return { sampleRect, sampleLuminance, version, ready: Boolean(canvasRef.current) };
 }

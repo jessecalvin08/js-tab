@@ -11,6 +11,7 @@ import { useClock } from './hooks/useClock.js';
 import { useWallpaperMedia } from './hooks/useWallpaperMedia.js';
 import { useAdaptiveTheme } from './hooks/useAdaptiveTheme.js';
 import { useWallpaperSampler } from './hooks/useWallpaperSampler.js';
+import { inkFor } from './utils/palette.js';
 import { useWeather } from './hooks/useWeather.js';
 import { BookmarkService } from './services/BookmarkService.js';
 import { BackupService, SnapshotService } from './services/BackupService.js';
@@ -383,10 +384,25 @@ export function App() {
   // declaration throws at render time.
   const [chromeTint, setChromeTint] = useState(cachedTints?.chrome ?? null);
 
+  // Text that sits straight on the wallpaper (brand, page title) has no glass
+  // behind it, so its colour is picked from the luminance of the patch under it.
+  const [inks, setInks] = useState(cachedTints?.inks ?? null);
+  const customWallpaper = (activeWallpaper?.kind ?? 'default') !== 'default';
+
   // Border/accent/shell come from the whole-image palette; the surfaces that sit
   // over a specific part of the wallpaper use the live sample instead.
-  const themeVars = adaptiveTheme || chromeTint
+  const themeVars = adaptiveTheme || chromeTint || (customWallpaper && inks)
     ? {
+        ...(customWallpaper && inks?.brand && {
+          '--brand-ink': inks.brand.ink,
+          '--brand-muted': inks.brand.muted,
+          '--brand-halo': inks.brand.halo
+        }),
+        ...(customWallpaper && inks?.title && {
+          '--title-ink': inks.title.ink,
+          '--title-muted': inks.title.muted,
+          '--title-halo': inks.title.halo
+        }),
         ...(chromeTint
           ? { '--glass-bg': chromeTint, '--chrome-bg': chromeTint }
           : adaptiveTheme && { '--glass-bg': adaptiveTheme.tints[0], '--chrome-bg': adaptiveTheme.chrome }),
@@ -400,7 +416,7 @@ export function App() {
 
   // Each card takes its colour from the patch of wallpaper directly behind it,
   // so moving a card to a different part of the background re-tints it.
-  const { sampleRect, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
+  const { sampleRect, sampleLuminance, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
   const [cardTints, setCardTints] = useState(cachedTints?.cards ?? {});
 
   const recomputeTints = useCallback(() => {
@@ -441,14 +457,36 @@ export function App() {
       }
     }
 
-    if (Object.keys(next).length || chrome) {
+    const inkFrom = (selector) => {
+      const element = document.querySelector(selector);
+      const luminance = element ? sampleLuminance(element.getBoundingClientRect()) : null;
+      return luminance == null ? null : inkFor(luminance);
+    };
+    const brand = inkFrom(`.${styles.brandText}`);
+    const title = inkFrom(`.${styles.collectionTitle}`);
+    if (brand || title) {
+      // Same rule again: a failed read keeps the previous ink.
+      setInks((prev) => {
+        const merged = { brand: brand ?? prev?.brand, title: title ?? prev?.title };
+        return prev && prev.brand === merged.brand && prev.title === merged.title
+          ? prev
+          : merged;
+      });
+    }
+
+    if (Object.keys(next).length || chrome || brand || title) {
       try {
-        window.localStorage.setItem(TINT_CACHE_KEY, JSON.stringify({ key: wallpaperKey, cards: next, chrome }));
+        window.localStorage.setItem(TINT_CACHE_KEY, JSON.stringify({
+          key: wallpaperKey,
+          cards: next,
+          chrome,
+          inks: brand || title ? { brand, title } : null
+        }));
       } catch {
         // cache is best-effort
       }
     }
-  }, [sampleRect, wallpaperKey]);
+  }, [sampleRect, sampleLuminance, wallpaperKey]);
 
   const cardStyle = (id) => {
     const tint = cardTints[id];
@@ -1225,18 +1263,6 @@ export function App() {
             <p>{allBookmarks.length} saved {allBookmarks.length === 1 ? 'bookmark' : 'bookmarks'} <span aria-hidden="true">·</span> {activeWorkspace.cards.length} folders</p>
           </div>
           <div className={styles.collectionControls}>
-            <label className={styles.bookmarkSearch}>
-              <Search size={17} aria-hidden="true" />
-              <input
-                type="search"
-                value={bookmarkFilter}
-                onChange={(event) => setBookmarkFilter(event.target.value)}
-                placeholder="Find a bookmark"
-                aria-label="Find a bookmark"
-              />
-              {bookmarkFilter && <button type="button" aria-label="Clear search" onClick={() => setBookmarkFilter('')}><X size={15} /></button>}
-              <kbd>⌘ K</kbd>
-            </label>
             <div className={styles.viewToggle} role="group" aria-label="Bookmark display">
               <button type="button" className={viewMode === 'list' ? styles.viewActive : ''} aria-pressed={viewMode === 'list'} aria-label="List view" onClick={() => setViewMode('list')}><Menu size={17} /></button>
               <button type="button" className={viewMode === 'icons' ? styles.viewActive : ''} aria-pressed={viewMode === 'icons'} aria-label="Icon view" onClick={() => setViewMode('icons')}><Grid2x2Plus size={17} /></button>

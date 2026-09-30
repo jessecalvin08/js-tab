@@ -1128,16 +1128,26 @@
 }
 
 .brandText strong {
+  color: var(--brand-ink, inherit);
   font-size: 14px;
   letter-spacing: -0.02em;
+  text-shadow: var(--brand-halo, none);
 }
 
-.brandText small,
-.eyebrow {
-  color: #8992a1;
+.brandText small {
+  color: var(--brand-muted, #8992a1);
   font-size: 9px;
   font-weight: 750;
   letter-spacing: 0.12em;
+  text-shadow: var(--brand-halo, none);
+}
+
+.eyebrow {
+  color: var(--title-muted, #8992a1);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-shadow: var(--title-halo, none);
 }
 
 .dashboard {
@@ -1156,7 +1166,8 @@
 
 .collectionTitle h1 {
   margin: 7px 0 4px;
-  color: #263247;
+  color: var(--title-ink, #263247);
+  text-shadow: var(--title-halo, none);
   font-size: clamp(27px, 3vw, 36px);
   font-weight: 680;
   line-height: 1.08;
@@ -1165,13 +1176,14 @@
 
 .collectionTitle p {
   margin: 0;
-  color: #8992a1;
+  color: var(--title-muted, #8992a1);
   font-size: 12px;
+  text-shadow: var(--title-halo, none);
 }
 
 .collectionTitle p span {
   padding: 0 5px;
-  color: #bdc3cc;
+  color: var(--title-muted, #bdc3cc);
 }
 
 .collectionControls {

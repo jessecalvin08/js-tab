@@ -1,31 +1,11 @@
 import { motion } from 'framer-motion';
-import { Gauge, ImagePlus, Mic, Paperclip, Plus, ScanSearch, Sparkles, Zap } from 'lucide-react';
+import { Mic, Plus, ScanSearch, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { AiComposer } from './AiComposer.jsx';
+import { PlusMenu } from './PlusMenu.jsx';
 import styles from './SearchBar.module.css';
 
 const LENS_URL = 'https://lens.google.com/';
-const AI_MODE_URL = 'https://www.google.com/search?udm=50';
-const GEMINI_URL = 'https://gemini.google.com/app';
-
-const PLUS_MENU = [
-  {
-    items: [
-      { label: 'Add images', icon: ImagePlus, url: LENS_URL },
-      { label: 'Add files', icon: Paperclip, url: AI_MODE_URL }
-    ]
-  },
-  {
-    title: 'Tools',
-    items: [{ label: 'Create images', emoji: '🍌', url: GEMINI_URL }]
-  },
-  {
-    title: 'Gemini 3 models',
-    items: [
-      { label: 'Fast', icon: Zap, url: GEMINI_URL },
-      { label: 'Pro', icon: Gauge, url: GEMINI_URL }
-    ]
-  }
-];
 
 async function fetchSuggestions(engine, query, signal) {
   if (engine === 'duckduckgo') {
@@ -43,11 +23,13 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const [listening, setListening] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const [text, setText] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [active, setActive] = useState(-1);
   const [focused, setFocused] = useState(false);
+  const [composer, setComposer] = useState(null);
   const engine = settings?.searchEngine ?? 'google';
   const isGoogle = engine === 'google';
   const canSuggest = isGoogle || engine === 'duckduckgo';
@@ -128,14 +110,31 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
     });
   }
 
-  function handleAiMode() {
-    const value = text.trim();
-    go(value ? `${AI_MODE_URL}&q=${encodeURIComponent(value)}` : AI_MODE_URL);
+  function openComposer(intent = null) {
+    setMenuOpen(false);
+    setSuggestions([]);
+    setComposer({ intent, text });
   }
 
-  function handleVoice() {
+  function closeComposer() {
+    setComposer(null);
+    inputRef.current?.focus();
+  }
+
+  async function handleVoice() {
     if (listening) {
       recognitionRef.current?.stop();
+      return;
+    }
+
+    setVoiceError('');
+    // Speech recognition on an extension page fails silently with "not-allowed" until
+    // the extension origin has been granted the microphone, so ask for it explicitly.
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+    } catch {
+      setVoiceError('Microphone blocked. Allow it from the lock icon in the address bar, or chrome://settings/content/microphone.');
       return;
     }
 
@@ -150,7 +149,16 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
       }
     };
     recognition.onend = () => setListening(false);
-    recognition.onerror = () => setListening(false);
+    recognition.onerror = (event) => {
+      setListening(false);
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setVoiceError('Microphone blocked. Allow it from the lock icon in the address bar.');
+      } else if (event.error === 'network') {
+        setVoiceError('Voice search needs an internet connection.');
+      } else if (event.error === 'no-speech') {
+        setVoiceError("Didn't catch that. Try again.");
+      }
+    };
     recognitionRef.current = recognition;
     setListening(true);
     recognition.start();
@@ -186,7 +194,7 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
         onChange={(event) => setText(event.target.value)}
         onFocus={() => { setFocused(true); setMenuOpen(false); }}
         onKeyDown={handleKeyDown}
-        placeholder={isGoogle ? 'Ask Google' : `Search ${engineLabel}`}
+        placeholder={voiceError || (listening ? 'Listening…' : (isGoogle ? 'Ask Google' : `Search ${engineLabel}`))}
         aria-label={`Search ${engineLabel} or open a URL`}
         autoComplete="off"
       />
@@ -206,27 +214,15 @@ export function SearchBar({ settings, searchUrl, engineLabel = 'Google' }) {
           <button type="button" className={styles.icon} aria-label="Search with Google Lens" onClick={() => go(LENS_URL)}>
             <ScanSearch size={20} />
           </button>
-          <button type="button" className={styles.aiMode} onClick={handleAiMode}>
+          <button type="button" className={styles.aiMode} onClick={() => openComposer()}>
             <Sparkles size={16} aria-hidden="true" /> AI Mode
           </button>
         </>
       )}
 
-      {menuOpen && (
-        <div className={styles.menu} role="menu">
-          {PLUS_MENU.map((group, index) => (
-            <div className={styles.group} key={index}>
-              {group.title && <span className={styles.groupTitle}>{group.title}</span>}
-              {group.items.map(({ label, icon: Icon, emoji, url }) => (
-                <button type="button" role="menuitem" className={styles.menuItem} key={label} onClick={() => go(url)}>
-                  {Icon ? <Icon size={18} aria-hidden="true" /> : <span className={styles.emoji} aria-hidden="true">{emoji}</span>}
-                  {label}
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+      {menuOpen && <PlusMenu onSelect={openComposer} />}
+
+      {composer && <AiComposer initialText={composer.text} intent={composer.intent} onClose={closeComposer} />}
 
       {showSuggestions && (
         <ul className={styles.suggestions} role="listbox">

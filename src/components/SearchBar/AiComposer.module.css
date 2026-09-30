@@ -1,0 +1,322 @@
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 15;
+  width: max(100%, min(620px, calc(100vw - 32px)));
+  padding: 10px 14px 10px 12px;
+  border-radius: 32px;
+  color: #1f2430;
+  background: #fff;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.3);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.plusWrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #1f2430;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+}
+
+.input::placeholder {
+  color: #9aa0a9;
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #1f2430;
+  background: transparent;
+  cursor: pointer;
+  transition: background 140ms ease;
+}
+
+.icon:hover,
+.iconOpen {
+  background: #f1f3f4;
+}
+
+.listening,
+.listening:hover {
+  color: #fff;
+  background: #d93025;
+}
+
+.attachRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0 6px 44px;
+}
+
+.chips {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.chip {
+  max-width: 230px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  border-radius: 12px;
+  color: #1f2430;
+  background: #edf2fb;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.chip img {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.chip button {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #5b6472;
+  background: transparent;
+  cursor: pointer;
+}
+
+.chip button:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.chipName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileBadge {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: #d93025;
+  background: #fff;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 999px;
+  color: #3c4658;
+  background: #f1f3f4;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pill:hover {
+  background: #e6e9ec;
+}
+
+.send {
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: #2f6df0;
+  cursor: pointer;
+  transition: background 140ms ease, opacity 140ms ease;
+}
+
+.send:hover:not(:disabled) {
+  background: #2459cc;
+}
+
+.send:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.thread {
+  max-height: 340px;
+  display: grid;
+  gap: 12px;
+  margin: 6px 0 4px;
+  padding: 12px 6px 4px 44px;
+  overflow-y: auto;
+  border-top: 1px solid #d6e4fb;
+}
+
+.userTurn {
+  justify-self: end;
+  max-width: 85%;
+  padding: 9px 14px;
+  border-radius: 18px;
+  background: #edf2fb;
+}
+
+.modelTurn {
+  max-width: 100%;
+}
+
+.thread p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.turnChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.turnChips img {
+  max-width: 120px;
+  max-height: 90px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.generated {
+  max-width: 100%;
+  margin-top: 8px;
+  border-radius: 14px;
+}
+
+.thinking {
+  margin: 4px 0 6px 44px;
+  color: #7a8291;
+  font-size: 14px;
+}
+
+.thread .thinking {
+  margin-left: 0;
+}
+
+.keyForm {
+  margin: 6px 0 4px 44px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f6f8fc;
+}
+
+.keyForm p {
+  margin: 0 0 10px;
+  color: #4a5363;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.keyForm a {
+  color: #2f6df0;
+}
+
+.keyForm div {
+  display: flex;
+  gap: 8px;
+}
+
+.keyForm input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #d3d9e4;
+  border-radius: 10px;
+  color: #1f2430;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+.keyForm button {
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  background: #2f6df0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.keyForm button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.error {
+  margin: 4px 0 4px 44px;
+  color: #c5221f;
+  font-size: 13px;
+}
+
+.suggestions {
+  margin: 4px 0 0;
+  padding: 6px 0 0;
+  list-style: none;
+  border-top: 1px solid #d6e4fb;
+}
+
+.suggestions button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 4px;
+  border: 0;
+  border-radius: 12px;
+  color: #1f2430;
+  background: transparent;
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestions button:hover {
+  background: #f4f6f8;
+}

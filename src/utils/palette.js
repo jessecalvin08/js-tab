@@ -130,28 +130,6 @@ export function tintFor(colour, luminance) {
   return `hsl(${colour.h} ${saturation}% ${lightness}% / 0.78)`;
 }
 
-// Picks whichever of light/dark text has the higher WCAG contrast against a
-// background of the given relative luminance, plus an opposite-coloured halo so
-// text stays legible where the wallpaper is busy (snow on dark rock, etc.).
-const LIGHT_INK = {
-  ink: '#f7f9fc',
-  muted: 'rgba(247, 249, 252, 0.82)',
-  halo: '0 1px 2px rgba(0, 0, 0, 0.55), 0 0 14px rgba(0, 0, 0, 0.35)'
-};
-
-const DARK_INK = {
-  ink: '#121826',
-  muted: 'rgba(18, 24, 38, 0.78)',
-  halo: '0 1px 2px rgba(255, 255, 255, 0.55), 0 0 14px rgba(255, 255, 255, 0.35)'
-};
-
-// Shared objects, so callers can compare results by reference.
-export function inkFor(luminance) {
-  const contrastWithLight = 1.05 / (luminance + 0.05);
-  const contrastWithDark = (luminance + 0.05) / 0.058;
-  return contrastWithLight >= contrastWithDark ? LIGHT_INK : DARK_INK;
-}
-
 export function buildTheme(palette) {
   if (!palette?.colours?.length) {
     return null;

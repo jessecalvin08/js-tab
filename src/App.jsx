@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bookmark, Calendar, Clock, Cloud, Columns3, Edit3, Grid2x2Plus, Image, Menu, MoreHorizontal, Pencil, Plus, Search, Settings, Timer, Trash2, X } from 'lucide-react';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { WorkspaceSelector } from './components/WorkspaceSelector/WorkspaceSelector.jsx';
 import { SearchBar } from './components/SearchBar/SearchBar.jsx';
 import { GlassCard } from './components/GlassCard/GlassCard.jsx';
 import { DraggableCard } from './components/DraggableCard/DraggableCard.jsx';
@@ -11,7 +10,6 @@ import { useClock } from './hooks/useClock.js';
 import { useWallpaperMedia } from './hooks/useWallpaperMedia.js';
 import { useAdaptiveTheme } from './hooks/useAdaptiveTheme.js';
 import { useWallpaperSampler } from './hooks/useWallpaperSampler.js';
-import { inkFor } from './utils/palette.js';
 import { useWeather } from './hooks/useWeather.js';
 import { BookmarkService } from './services/BookmarkService.js';
 import { BackupService, SnapshotService } from './services/BackupService.js';
@@ -383,24 +381,14 @@ export function App() {
   // declaration throws at render time.
   const [chromeTint, setChromeTint] = useState(cachedTints?.chrome ?? null);
 
-  // Text that sits straight on the wallpaper (brand, page title) has no glass
-  // behind it, so its colour is picked from the luminance of the patch under it.
-  const [inks, setInks] = useState(cachedTints?.inks ?? null);
   const customWallpaper = (activeWallpaper?.kind ?? 'default') !== 'default';
 
   // Border/accent/shell come from the whole-image palette; the surfaces that sit
   // over a specific part of the wallpaper use the live sample instead.
-  const themeVars = adaptiveTheme || chromeTint || (customWallpaper && inks)
+  const themeVars = adaptiveTheme || chromeTint
     ? {
-        ...(customWallpaper && inks?.brand && {
-          '--brand-ink': inks.brand.ink,
-          '--brand-muted': inks.brand.muted,
-          '--brand-halo': inks.brand.halo
-        }),
-        ...(customWallpaper && inks?.title && {
-          '--title-ink': inks.title.ink,
-          '--title-muted': inks.title.muted,
-          '--title-halo': inks.title.halo
+        ...(customWallpaper && (chromeTint || adaptiveTheme) && {
+          '--panel-ink': '#f2f6fb'
         }),
         ...(chromeTint
           ? { '--glass-bg': chromeTint, '--chrome-bg': chromeTint }
@@ -415,7 +403,7 @@ export function App() {
 
   // Each card takes its colour from the patch of wallpaper directly behind it,
   // so moving a card to a different part of the background re-tints it.
-  const { sampleRect, sampleLuminance, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
+  const { sampleRect, version: samplerVersion } = useWallpaperSampler(wallpaperMedia);
   const [cardTints, setCardTints] = useState(cachedTints?.cards ?? {});
 
   const recomputeTints = useCallback(() => {
@@ -456,36 +444,18 @@ export function App() {
       }
     }
 
-    const inkFrom = (selector) => {
-      const element = document.querySelector(selector);
-      const luminance = element ? sampleLuminance(element.getBoundingClientRect()) : null;
-      return luminance == null ? null : inkFor(luminance);
-    };
-    const brand = inkFrom(`.${styles.brandText}`);
-    const title = inkFrom(`.${styles.collectionTitle}`);
-    if (brand || title) {
-      // Same rule again: a failed read keeps the previous ink.
-      setInks((prev) => {
-        const merged = { brand: brand ?? prev?.brand, title: title ?? prev?.title };
-        return prev && prev.brand === merged.brand && prev.title === merged.title
-          ? prev
-          : merged;
-      });
-    }
-
-    if (Object.keys(next).length || chrome || brand || title) {
+    if (Object.keys(next).length || chrome) {
       try {
         window.localStorage.setItem(TINT_CACHE_KEY, JSON.stringify({
           key: wallpaperKey,
           cards: next,
-          chrome,
-          inks: brand || title ? { brand, title } : null
+          chrome
         }));
       } catch {
         // cache is best-effort
       }
     }
-  }, [sampleRect, sampleLuminance, wallpaperKey]);
+  }, [sampleRect, wallpaperKey]);
 
   const cardStyle = (id) => {
     const tint = cardTints[id];
@@ -1203,11 +1173,6 @@ export function App() {
       )}
       <div className={styles.ambient} aria-hidden="true" />
       <section className={styles.topBar} aria-label="Dashboard controls">
-        <a className={styles.brand} href="#bookmarks" aria-label="J's Tab bookmarks home">
-          <span className={styles.brandMark} aria-hidden="true">J</span>
-          <span className={styles.brandText}><strong>J's Tab</strong><small>BOOKMARK LIBRARY</small></span>
-        </a>
-        <WorkspaceSelector />
         {widgetSettings.search && (
           <SearchBar
             settings={settings}
@@ -1249,11 +1214,6 @@ export function App() {
         transition={{ duration: 0.55, ease: 'easeOut' }}
       >
         <div className={styles.collectionBar} id="bookmarks">
-          <div className={styles.collectionTitle}>
-            <span className={styles.eyebrow}>YOUR LIBRARY</span>
-            <h1>{activeWorkspace.name}</h1>
-            <p>{allBookmarks.length} saved {allBookmarks.length === 1 ? 'bookmark' : 'bookmarks'} <span aria-hidden="true">·</span> {activeWorkspace.cards.length} folders</p>
-          </div>
           <div className={styles.collectionControls}>
             <div className={styles.viewToggle} role="group" aria-label="Bookmark display">
               <button type="button" className={viewMode === 'list' ? styles.viewActive : ''} aria-pressed={viewMode === 'list'} aria-label="List view" onClick={() => setViewMode('list')}><Menu size={17} /></button>

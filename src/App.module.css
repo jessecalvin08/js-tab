@@ -1068,6 +1068,7 @@
 /* Folder-first library treatment inspired by the reference extension. */
 .shell {
   --color-cream: #263247;
+  --panel-ink: #263247;
   --color-muted: #727d8e;
   --color-mint: #e5eaff;
   --glass-border: rgba(34, 48, 70, 0.1);
@@ -1092,62 +1093,10 @@
 .topBar {
   width: min(100%, 1280px);
   max-width: 1280px;
-  grid-template-columns: auto minmax(160px, 215px) minmax(220px, 1fr) auto;
+  grid-template-columns: minmax(220px, 1fr) auto;
   gap: clamp(12px, 2vw, 28px);
   padding-bottom: 20px;
   border-bottom: 1px solid rgba(34, 48, 70, 0.08);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.brandMark {
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  color: #fff;
-  background: #506dd2;
-  font-family: Georgia, serif;
-  font-size: 21px;
-  font-weight: 700;
-  box-shadow: 0 4px 10px rgba(80, 109, 210, 0.18);
-}
-
-.brandText {
-  display: grid;
-  gap: 2px;
-  line-height: 1;
-}
-
-.brandText strong {
-  color: var(--brand-ink, inherit);
-  font-size: 14px;
-  letter-spacing: -0.02em;
-  text-shadow: var(--brand-halo, none);
-}
-
-.brandText small {
-  color: var(--brand-muted, #8992a1);
-  font-size: 9px;
-  font-weight: 750;
-  letter-spacing: 0.12em;
-  text-shadow: var(--brand-halo, none);
-}
-
-.eyebrow {
-  color: var(--title-muted, #8992a1);
-  font-size: 9px;
-  font-weight: 750;
-  letter-spacing: 0.12em;
-  text-shadow: var(--title-halo, none);
 }
 
 .dashboard {
@@ -1159,31 +1108,9 @@
 .collectionBar {
   display: flex;
   align-items: end;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 22px;
   padding: 8px 0 22px;
-}
-
-.collectionTitle h1 {
-  margin: 7px 0 4px;
-  color: var(--title-ink, #263247);
-  text-shadow: var(--title-halo, none);
-  font-size: clamp(27px, 3vw, 36px);
-  font-weight: 680;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
-}
-
-.collectionTitle p {
-  margin: 0;
-  color: var(--title-muted, #8992a1);
-  font-size: 12px;
-  text-shadow: var(--title-halo, none);
-}
-
-.collectionTitle p span {
-  padding: 0 5px;
-  color: var(--title-muted, #bdc3cc);
 }
 
 .collectionControls {
@@ -1530,7 +1457,7 @@
 
 @media (max-width: 1100px) {
   .topBar {
-    grid-template-columns: auto minmax(150px, 210px) minmax(200px, 1fr);
+    grid-template-columns: minmax(200px, 1fr);
   }
 
   .widgetCluster {
@@ -1602,14 +1529,6 @@
     grid-template-columns: 1fr;
   }
 
-  .brandText small {
-    display: none;
-  }
-
-  .collectionTitle h1 {
-    font-size: 29px;
-  }
-
   .viewToggle {
     flex: 0 0 auto;
   }
@@ -1624,4 +1543,22 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Floating panels sit on the tinted chrome glass rather than on the light
+   board, so their ink follows --panel-ink (light once the wallpaper tints the
+   glass dark, dark on the default light theme). */
+.modal,
+.widgetsPanel,
+.linkPopover,
+.cardMenu,
+.settingsPanel {
+  --color-cream: var(--panel-ink);
+  color: var(--panel-ink);
+}
+
+.modal h2,
+.widgetsPanel .widgetRow span,
+.cardMenu button {
+  color: var(--panel-ink);
 }

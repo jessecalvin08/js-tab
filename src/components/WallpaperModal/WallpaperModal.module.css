@@ -240,3 +240,8 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+.modal {
+  --color-cream: var(--panel-ink, #263247);
+  color: var(--panel-ink, #263247);
+}

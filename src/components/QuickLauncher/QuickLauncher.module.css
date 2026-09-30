@@ -105,3 +105,8 @@
   color: rgba(238, 251, 240, 0.45);
   font-size: 0.88rem;
 }
+
+.panel {
+  --color-cream: var(--panel-ink, #263247);
+  color: var(--panel-ink, #263247);
+}

@@ -1115,9 +1115,17 @@
   border-bottom: 1px solid rgba(34, 48, 70, 0.08);
 }
 
-.topBar > form {
+.searchRow {
   grid-column: 2;
   width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchRow > form {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .topBar .widgetCluster {
@@ -1503,7 +1511,7 @@
     min-width: 0;
   }
 
-  .topBar > :global(form) {
+  .searchRow {
     grid-column: 1 / -1;
     grid-row: 2;
     max-width: none;

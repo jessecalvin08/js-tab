@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Bookmark, Calendar, Clock, Cloud, Columns3, Edit3, Grid2x2Plus, Image, Menu, MoreHorizontal, Pencil, Plus, Search, Settings, Timer, Trash2, X } from 'lucide-react';
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SearchBar } from './components/SearchBar/SearchBar.jsx';
+import { CalculatorLauncher } from './components/Calculator/CalculatorLauncher.jsx';
 import { GlassCard } from './components/GlassCard/GlassCard.jsx';
 import { DraggableCard } from './components/DraggableCard/DraggableCard.jsx';
 import { Pomodoro } from './components/Pomodoro/Pomodoro.jsx';
@@ -1194,13 +1195,16 @@ export function App() {
           </div>
           <button type="button" className={styles.addFolderButton} onClick={() => setModal({ type: 'card' })}><Plus size={17} /> New folder</button>
         </div>
-        {widgetSettings.search && (
-          <SearchBar
-            settings={settings}
-            searchUrl={(q) => searchUrlFor(settings, q)}
-            engineLabel={SEARCH_ENGINES[settings.searchEngine ?? 'google']?.label ?? 'Google'}
-          />
-        )}
+        <div className={styles.searchRow}>
+          <CalculatorLauncher />
+          {widgetSettings.search && (
+            <SearchBar
+              settings={settings}
+              searchUrl={(q) => searchUrlFor(settings, q)}
+              engineLabel={SEARCH_ENGINES[settings.searchEngine ?? 'google']?.label ?? 'Google'}
+            />
+          )}
+        </div>
         <div className={styles.widgetCluster}>
           {widgetSettings.weather && (
             <GlassCard className={styles.miniWidget} title={weather?.label ?? weatherError ?? 'Loading weather'}>
